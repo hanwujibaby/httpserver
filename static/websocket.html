@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>WebSocket Chart Room</title>
+<style type="text/css">
+pre,html,body {
+	margin: 0;
+	parding: 0;
+	width: 100%;
+	height: 100%;
+	background-color: black;
+	font: 15px "Courier New", "微软雅黑", sans-serif, 宋体;
+	color: #E0E0E0;
+	word-break: break-all;
+	word-wrap: break-word;
+}
+
+.div-command-input-container {
+	position: fixed;
+	bottom: 0px;
+	width: 100%;
+	height: 30px;
+	margin-rigth: 6px;
+	background: black;
+}
+
+.div-command-input-container input[type=text] {
+	width: 100%;
+	height: 100%;
+	outline: 0px;
+	font: 15px "Courier New", "Microsoft YaHei", sans-serif, 宋体;
+	color: #E0E0E0;
+	background-color: black;
+	border: 1px solid rgba(103, 166, 217, 1);
+	border-radius: 5px;
+	padding-left: 5px;
+	line-height: 18px;
+}
+
+.div-command-input-container input[type=text]:focus {
+	box-shadow: 0 0 10px rgba(103, 166, 217, 1);
+}
+
+.div-command-input-container select {
+	outline: 0px;
+	font: 15px "Courier New", "Microsoft YaHei", sans-serif, 宋体;
+	color: #E0E0E0;
+	background-color: black;
+	border: 1px solid rgba(103, 166, 217, 1);
+	width: 100%;
+	height: 100%;
+	text-align: right;
+}
+
+.div-command-input-container select:focus {
+	box-shadow: 0 0 10px rgba(103, 166, 217, 1);
+}
+
+table,tr,td {
+	border: 0;
+	margin: 0;
+	parding: 0;
+	height: 100%;
+}
+</style>
+</head>
+<body>
+	<div id="div-result-display" style="padding-bottom: 40px;"></div>
+	<div class="div-command-input-container">
+		<table>
+			<tr>
+				<td><div style="width:150px">请输入你想说的话：</div></td>
+				<td width="100%"><input type="text" id="command-text-input"
+					onkeypress="onkeypress1(event)"></td>
+				<td>&nbsp;</td>
+			</tr>
+		</table>
+	</div>
+</body>
+<script type="text/javascript">
+	var socket = null;
+	window.onload=function(){
+		connect();
+	}
+	function connect(){
+		var name = prompt("请输入一个聊天名");
+		name = name.trim();
+		if(name.length==0){
+			connect();
+			return ;
+		}
+		var s = new WebSocket("ws://" + location.host + "/websocket.do?name="+name);
+		s.addEventListener("open", onopen, true);
+		s.addEventListener("close", onclose, true);
+		s.addEventListener("message", onmessage, true);
+	}
+	function onopen(e) {
+		var node = document.createTextNode();
+		node.textContent = "你已经成功进入聊天室";
+		var div = document.createElement("div");
+		div.appendChild(node);
+		document.getElementById("div-result-display").appendChild(div);
+		socket = e.target;
+	}
+	function onclose() {
+		var node = document.createTextNode();
+		node.textContent = "你已经与聊天室断开连接";
+		var div = document.createElement("div");
+		div.appendChild(node);
+		document.getElementById("div-result-display").appendChild(div);
+		socket = null;
+	}
+	function onmessage(evt) {
+		var node = document.createTextNode();
+		node.textContent = evt.data;
+		var div = document.createElement("div");
+		div.appendChild(node);
+		document.getElementById("div-result-display").appendChild(div);
+	}
+	function onkeypress1(e) {
+		var keynum;
+		if (window.event) {
+			keynum = e.keyCode;
+		} else if (e.which) {
+			keynum = e.which;
+		}
+		if (keynum == 13 || keynum == 32) {
+			e.preventDefault();
+			var i = document.getElementById("command-text-input");
+			var message = i.value;
+			i.value = null;
+			if(socket!=null){
+				socket.send(message);
+			}else{
+				alert("你已经与聊天室断开连接");
+			}
+		}
+	}
+</script>
+</html>

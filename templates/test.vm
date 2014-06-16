@@ -1,0 +1,10 @@
+<html>
+	<head>
+	</head>
+	<body>
+		<div>姓名：$name</div>
+		<div>年龄：$age</div>
+		<div>语言：$!language</div>
+		<div>描述：$!description</div>
+	</body>
+</html>
